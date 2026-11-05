@@ -58,9 +58,9 @@ button,input{font:inherit;color:inherit}
 
 /* gradient objects exported 1:1 from Figma (visible crop, frame coordinates) */
 .bi{position:absolute;display:none;max-width:none}
-.ui[data-mode="idle"] .bi-intro,.ui[data-mode="lobby"] .bi-intro{display:block;left:0;top:418px;width:1396px;height:662px;animation:fadeIn 1s ease-out backwards}
-.ui[data-mode="about"] .bi-l{display:block;left:0;top:540px;width:572px;height:540px;animation:slideL .9s cubic-bezier(.2,1,.3,1) backwards}
-.ui[data-mode="about"] .bi-r{display:block;left:1400px;top:540px;width:520px;height:540px;animation:slideR .9s cubic-bezier(.2,1,.3,1) backwards}
+.ui[data-mode="idle"] .bi-intro,.ui[data-mode="lobby"] .bi-intro{display:block;left:0;bottom:0;width:1396px;height:662px;animation:fadeIn 1s ease-out backwards}
+.ui[data-mode="about"] .bi-l{display:block;left:0;bottom:0;width:572px;height:540px;animation:slideL .9s cubic-bezier(.2,1,.3,1) backwards}
+.ui[data-mode="about"] .bi-r{display:block;right:0;bottom:0;width:520px;height:540px;animation:slideR .9s cubic-bezier(.2,1,.3,1) backwards}
 .dim{position:absolute;inset:0;background:#000;opacity:0;transition:opacity .7s}
 .ui[data-sub="rules"] .dim{opacity:.5}
 @keyframes slideL{from{translate:-110% 0;opacity:0}to{translate:0 0;opacity:1}}
@@ -83,12 +83,12 @@ button,input{font:inherit;color:inherit}
 .cd.hot{background:#FF3B30}
 .ui[data-mode="idle"] .cd{display:none}
 .ui[data-mode="lobby"] .cd{top:242px;bottom:auto;border-radius:27.36px}
-.ui[data-cdonly="1"] .cd{right:auto;bottom:auto;left:960px;top:540px;transform:translate(-50%,-50%) scale(2.2)}
+.ui[data-cdonly="1"] .cd{right:auto;bottom:auto;left:50%;top:50%;transform:translate(-50%,-50%) scale(2.2)}
 .ui[data-cdonly="1"] .shade{background:rgba(0,0,0,.45)}
 .ui[data-cdonly="1"] .v,.ui[data-cdonly="1"] .brandbar,.ui[data-cdonly="1"] .labels,.ui[data-cdonly="1"] .msg,.ui[data-cdonly="1"] .bi,.ui[data-cdonly="1"] .dim{display:none!important}
 
 /* lobby (interface – projekce – intro) */
-.v-lobby .big{position:absolute;left:64px;top:64px;width:1792px;height:113.95px;color:#fff;opacity:.8;animation:dropIn .8s cubic-bezier(.2,1,.3,1) backwards}
+.v-lobby .big{position:absolute;left:64px;top:64px;width:calc(100% - 128px);height:auto;aspect-ratio:474.535/30.175;max-height:180px;color:#fff;opacity:.8;animation:dropIn .8s cubic-bezier(.2,1,.3,1) backwards}
 .v-lobby .row{position:absolute;left:64px;top:242px;display:flex;gap:96px;align-items:flex-start;animation:slideL .8s .1s cubic-bezier(.2,1,.3,1) backwards}
 .v-lobby h2{margin:0;font:600 69.4px/1 var(--f-sans);white-space:nowrap}
 .v-lobby .copy{width:608px;display:flex;flex-direction:column;gap:28px}
@@ -105,7 +105,7 @@ button,input{font:inherit;color:inherit}
 .v-about h2{margin:0;font:600 119.7px/1 var(--f-sans);white-space:nowrap;animation:slideL .8s cubic-bezier(.2,1,.3,1) backwards}
 .v-about .row p{margin:0;width:1022px;font:400 43.65px/1 var(--f-sans);animation:slideR .8s .12s cubic-bezier(.2,1,.3,1) backwards}
 .v-about .row p b{font-weight:700}
-.v-about .credit{position:absolute;left:722.5px;top:707px;width:475px;display:flex;flex-direction:column;gap:32px;animation:slideUp .8s .3s cubic-bezier(.2,1,.3,1) backwards}
+.v-about .credit{position:absolute;left:50%;margin-left:-237.5px;bottom:103px;width:475px;display:flex;flex-direction:column;gap:32px;animation:slideUp .8s .3s cubic-bezier(.2,1,.3,1) backwards}
 .v-about .credit .wm{width:474.5px;height:30.2px;color:#fff;opacity:.8}
 .v-about .loc{display:flex;justify-content:space-between;align-items:center;font:400 29.75px/1 var(--f-sans)}
 .v-about .loc span{display:flex;align-items:center;gap:11px}
@@ -115,7 +115,7 @@ button,input{font:inherit;color:inherit}
 .v-about .pres svg{width:475px;height:33.3px}
 
 /* minigame screens */
-.v-game{position:absolute;left:64px;top:156px;width:1792px;height:636px;display:flex;gap:16px;align-items:flex-start}
+.v-game{position:absolute;left:64px;right:64px;top:156px;height:636px;display:flex;gap:16px;align-items:flex-start}
 .g-card{width:741px;flex:none;display:flex;flex-direction:column;border-radius:24px;overflow:hidden;height:636px;transition:height .5s cubic-bezier(.2,1,.3,1),width .5s cubic-bezier(.2,1,.3,1);animation:slideL .7s cubic-bezier(.2,1,.3,1) backwards}
 .g-top{flex:1;min-height:0;position:relative;padding:32px;display:flex;flex-direction:column;justify-content:space-between;background:var(--grad-card)}
 .g-hd{display:flex;flex-direction:column;align-items:flex-start;gap:32px;min-width:0}
@@ -186,17 +186,17 @@ button,input{font:inherit;color:inherit}
 .board li.gap{justify-content:center;padding:2px;opacity:.6;animation:none}
 
 /* final standings */
-.v-final .champ{position:absolute;left:50%;top:625px;transform:translateX(-50%);width:529.35px;background:var(--yellow);color:#000;border-radius:31.63px;padding:42.18px;display:flex;flex-direction:column;gap:42.18px;animation:rise .7s cubic-bezier(.2,1.2,.4,1)}
+.v-final .champ{position:absolute;left:50%;bottom:173px;transform:translateX(-50%);width:529.35px;background:var(--yellow);color:#000;border-radius:31.63px;padding:42.18px;display:flex;flex-direction:column;gap:42.18px;animation:rise .7s cubic-bezier(.2,1.2,.4,1)}
 @keyframes rise{from{transform:translate(-50%,40px);opacity:0}to{transform:translate(-50%,0);opacity:1}}
 .v-final .champ small{font:600 21.09px/1.15 var(--f-sans)}
 .v-final .champ h2{margin:0;font:600 84.35px/1.14 var(--f-sans);white-space:nowrap;overflow:hidden;max-width:445px}
 .v-final .meta{display:flex;justify-content:space-between;align-items:center;font:600 21.09px/1.15 var(--f-sans)}
 .v-final .meta span{display:flex;align-items:center;gap:10.5px}
 .v-final .meta i{width:36px;height:36px;border-radius:10.5px;border:2px solid #fff;display:block}
-.v-final .note{animation:slideUp .7s .2s cubic-bezier(.2,1,.3,1) backwards;position:absolute;left:50%;top:934px;transform:translateX(-50%);width:529px;background:var(--blue);border-radius:24px;padding:32px;font:600 16px/1.15 var(--f-sans);text-align:center}
+.v-final .note{animation:slideUp .7s .2s cubic-bezier(.2,1,.3,1) backwards;position:absolute;left:50%;bottom:64px;transform:translateX(-50%);width:529px;background:var(--blue);border-radius:24px;padding:32px;font:600 16px/1.15 var(--f-sans);text-align:center}
 
 /* client message: chat bubble in the middle of the screen */
-.msg{position:absolute;left:800px;top:400px;translate:-50% -50%;width:720px;display:flex;flex-direction:column;gap:14px;align-items:flex-start}
+.msg{position:absolute;left:calc(50% - 160px);top:calc(50% - 140px);translate:-50% -50%;width:720px;display:flex;flex-direction:column;gap:14px;align-items:flex-start}
 .msg .who{display:flex;align-items:center;gap:12px;font:600 22px/1 var(--f-sans);text-shadow:0 2px 10px rgba(0,0,0,.5)}
 .msg .who i{width:44px;height:44px;border-radius:50%;background:var(--blue);display:grid;place-items:center;font-style:normal;font:600 20px/1 var(--f-sans)}
 .msg .bub{background:#fff;color:#000;border-radius:32px 32px 32px 8px;padding:28px 36px;font:600 52px/1.08 var(--f-sans);box-shadow:0 20px 50px rgba(0,0,0,.35);transform-origin:0 100%;animation:pop .45s cubic-bezier(.2,1.5,.4,1) backwards;max-width:720px;text-wrap:balance}
@@ -534,7 +534,7 @@ const GAMES=[
 ];
 const BAD=['Make the logo bigger','Can it pop more?','07_final_final.pdf','logo_v12_FINAL2.ai','Can we try Comic Sans?','My nephew does design','Just a quick change','Make it more modern','Can it go viral?','We have no budget','It\'s great exposure','Make the white whiter','Use the photo from my phone','ASAP!!!','Love it. 10 more options?','brief_REAL_final.docx','I\'ll know it when I see it','Make it pop','Per my last email','Can you just Photoshop it?','Bigger. No, smaller.','Add more white space. Fill it.','Can it be blue? But red.','Quick call?','Logo 3x bigger pls'];
 const GOOD=['Deposit paid','Invoice approved','Love it, no changes','Paid in full','Signed off','Budget increased'];
-const QUOTES=['One more thing…','Please could you make some changes?','Can we make the logo bigger first?','Our CEO\'s wife has some feedback.','Let\'s do just one more round.','The board wants to see it in green.','Accounting needs a new PO number.','We\'ll pay once it goes viral.'];
+const QUOTES=['One more thing…','Could you make a few tiny changes?','Can we make the logo bigger first?','Our CEO showed it to the team. A few notes.','Let\'s do just one more round.','The board would love to see it in green.','Accounting needs a new PO number.','We\'ll pay once it goes viral.','Love it! Can we see three more options?','Quick call? Won\'t take long.'];
 const BRANDS=[['Apple','🍎','💻'],['Tesla','⚡','🚗'],['IKEA','🪑','🇸🇪'],['Coca-Cola','🥤','🎅'],['Ford','🐎','🛻'],['Samsung','📱','🇰🇷'],['McDonald\'s','🍟','🤡'],['Nike','👟','✔️'],['Starbucks','☕','🧜'],['Netflix','🍿','📺'],['LEGO','🧱','🧒'],['Red Bull','🐂','🏎️'],['Spotify','🎧','🟢'],['Airbnb','🏠','🧳']];
 const MILESTONES=[[0,'BRIEF RECEIVED'],[5000,'FIRST DRAFT'],[15000,'ROUND OF REVISIONS'],[25000,'07_FINAL_FINAL.PDF'],[35000,'LEGAL REVIEW'],[45000,'BACK TO THE BRIEF']];
 const NA=['Pixel','Kern','Vector','Bezier','Grid','Swatch','Serif','Glyph','Mood','Layer','Artboard','Pantone','Hex','Gutter','Baseline','Tracking','Mockup','Brief','Raster','Spline','Anchor','Halftone','Gradient','Token','Lorem','Ipsum','Bleed','Crop','Orphan','Widow','Margin','Stroke','Opacity','Blend','Mask','Kerning'];
@@ -548,7 +548,7 @@ const brandRounds=seed=>{const r=xs(seed);const picks=shuffle(BRANDS,r).slice(0,
    Sound + voiceover
    ========================================================= */
 const Snd={ctx:null,on:true,vbuf:{},vpend:0,q:[],cur:null,loaded:false,sbuf:{},crowdG:null,crowdSrc:null,crowdT:0,crowdOn:false,boost:0,
-  init(){try{if(!this.ctx){this.ctx=new(window.AudioContext||window.webkitAudioContext)();this.out=this.ctx.createGain();this.out.connect(this.out);}if(this.ctx.state==='suspended')this.ctx.resume();this.loadVO();}catch(e){}},
+  init(){try{if(!this.ctx){this.ctx=new(window.AudioContext||window.webkitAudioContext)();this.out=this.ctx.createGain();this.out.connect(this.ctx.destination);}if(this.ctx.state==='suspended')this.ctx.resume();this.loadVO();}catch(e){}},
   dec(b64,cb){try{const s=atob(b64),u=new Uint8Array(s.length);for(let i=0;i<s.length;i++)u[i]=s.charCodeAt(i);this.ctx.decodeAudioData(u.buffer,cb,()=>{});}catch(e){}},
   loadSFX(){if(this.sfxLoaded||!this.ctx||!window.BL_SFX)return;this.sfxLoaded=true;Object.entries(window.BL_SFX).forEach(([n,b])=>this.dec(b,buf=>{this.sbuf[n]=buf;if(n==='crowd'&&this.crowdOn)this.startCrowd();}));},
   startCrowd(){if(ROLE!=='screen')return;this.crowdOn=true;if(!this.ctx||this.crowdSrc||!this.sbuf.crowd)return;const c=this.ctx;this.crowdG=c.createGain();this.crowdG.gain.value=0;this.crowdG.connect(this.out);const s=c.createBufferSource();s.buffer=this.sbuf.crowd;s.loop=true;s.connect(this.crowdG);s.start();this.crowdSrc=s;},
@@ -961,7 +961,7 @@ const Proj=(()=>{
   const ui=$('#ui'),V={lobby:$('#vLobby'),about:$('#vAbout'),game:$('#vGame'),count:$('#vCount'),board:$('#vBoard'),final:$('#vFinal')};
   const demo=$('#demo'),dx=demo.getContext('2d'),labelsEl=$('#labels'),pool=[];
   let cur=null,boardKey='',toastUntil=-1,lastStage='',qrDone=false,scale=1;
-  new ResizeObserver(()=>{const r=$('#proj').getBoundingClientRect();scale=Math.min(r.width/1920,r.height/1080)||1;ui.style.transform=`scale(${scale})`;ui.style.left=((r.width-1920*scale)/2)+'px';ui.style.top=((r.height-1080*scale)/2)+'px';}).observe($('#proj'));
+  new ResizeObserver(()=>{const r=$('#proj').getBoundingClientRect();if(!r.width)return;scale=Math.min(r.width/1920,r.height/1080)||1;ui.style.transform=`scale(${scale})`;ui.style.width=(r.width/scale)+'px';ui.style.height=(r.height/scale)+'px';}).observe($('#proj'));
   const show=keys=>Object.entries(V).forEach(([k,e])=>e.hidden=!keys.includes(k));
   const mode=m=>{if(ui.dataset.mode!==m){const c=$('#cd');c.style.animation='none';void c.offsetWidth;c.style.animation='';}ui.dataset.mode=m;};
   function qr(){if(qrDone)return;qrDone=true;const url=location.origin+'/';try{new QRCode($('#qr'),{text:url,width:304,height:304,colorDark:'#000000',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});}catch(e){$('#qr').textContent='QR';}}
@@ -970,7 +970,7 @@ const Proj=(()=>{
   api.onMode=()=>{cur=null;
     if(G.mode==='idle'){mode('idle');show(['lobby']);$('#lobCopy').textContent='The stadium opens in a moment. Get your thumb ready.';$('#lobCount').textContent='';}
     if(G.mode==='lobby'){mode('lobby');show(['lobby']);qr();$('#lobCopy').textContent='Scan the code, pick name, get a colour. You’ll need one thumb and zero briefs.';}};
-  api.refresh=()=>{boardKey='';};
+  api.refresh=()=>{boardKey='';if(cur&&(cur.type==='podium'||cur.type==='final'))renderFinal();};
   api.flash=()=>{const f=$('#flash');f.classList.remove('on');void f.offsetWidth;f.classList.add('on');};
   let msgTimer=null;
   api.toast=(q,oldD,newD)=>{const t=$('#toast');clearTimeout(msgTimer);
@@ -1002,7 +1002,7 @@ const Proj=(()=>{
     $('#bList').innerHTML=h||'<li class="gap">No players yet</li>';$('#bList').querySelectorAll('.nm').forEach(e=>fit(e,11));}
   function renderFinal(){const w=G.results&&G.results.byTot[0];
     if(!w){$('#champ').innerHTML='<small>BOLDLYMPICS CHAMPION OF THE WORLD!</small><h2>Nobody</h2>';return;}
-    $('#champ').innerHTML=`<small>BOLDLYMPICS CHAMPION OF THE WORLD!</small><div><h2>${esc(w.nick)}</h2><div class="meta"><span><i style="background:${w.color}"></i>${w.color}</span><span>${fmtPts(w.total)} pts</span></div></div>`;fit($('#champ h2'),30);}
+    $('#champ').innerHTML=`<small>BOLDLYMPICS CHAMPION OF THE WORLD!</small><div><h2>${esc(w.nick)}</h2><div class="meta"><span><i style="background:${w.color}"></i>${w.color}</span><span>${fmtPts(w.total)} pts</span></div></div>`;fit($('#champ h2'),30);requestAnimationFrame(()=>fit($('#champ h2'),30));if(document.fonts)document.fonts.ready.then(()=>fit($('#champ h2'),30));}
   function labels(){
     const want=[],m=ui.dataset.mode;
     if(G.cdOnly||!(m==='results'||m==='final'||m==='count')){pool.forEach(d=>d.hidden=true);return;}
@@ -1165,7 +1165,9 @@ function ColorGame(seed){
   const tg=colorTargets(seed),scores=[null,null,null,null];let host,key='',cur={h:0,s:0,b:50},picked=-1,tp=0;
   const ptsFor=c=>{const dE=deltaE(hsb2rgb(c.h,c.s,c.b),hsb2rgb(cur.h,cur.s,cur.b));return{dE,pts:Math.round(1300*Math.pow(clamp(1-dE/45,0,1),1.6))};};
   function paint(){['h','s','b'].forEach(k=>{const i=$('#cm'+k),o=$('#cmo'+k);if(!i)return;i.value=cur[k];o.textContent=cur[k]+(k==='h'?'°':'%');});
-    ['cmh','cms','cmb'].forEach(id=>{const e=$('#'+id);if(e)e.style.background='#DADCE0';});
+    $('#cmh').style.background='linear-gradient(90deg,#f00,#ff0,#0f0,#0ff,#00f,#f0f,#f00)';
+    $('#cms').style.background=`linear-gradient(90deg,${hsbHex(cur.h,0,cur.b)},${hsbHex(cur.h,100,cur.b)})`;
+    $('#cmb').style.background=`linear-gradient(90deg,#000,${hsbHex(cur.h,cur.s,100)})`;
     if(key.endsWith('pick'))$('#cmSw').style.background=hsbHex(cur.h,cur.s,cur.b);}
   function enter(rd,st){const sw=$('#cmSw'),ctrl=$('#cmCtrl'),c=tg[rd],hex=hsbHex(c.h,c.s,c.b);ctrl.classList.toggle('off',st!=='pick');
     if(st==='show'){sw.style.background=hex;sw.innerHTML=`<span>Colour ${rd+1}/4<br>Memorise it</span>`;}
