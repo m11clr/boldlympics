@@ -20,7 +20,7 @@ app.use(express.static(PUB, { index: false, maxAge: '1h' }));
 app.get('/healthz', (req, res) => res.send('ok'));
 
 /* ---------- game rules (kept in sync with the client) ---------- */
-const T = { lobby: 120, story: 30, client: 10, finalround: 3, rules: 10, results: 20, clientfinal: 10, podium: 30, final: 15, total: 480 };
+const T = { lobby: 120, story: 35, client: 10, finalround: 3, rules: 10, results: 20, clientfinal: 10, podium: 30, final: 15, total: 485 };
 const GAMES = [{ dur: 20, max: 5000 }, { dur: 20, max: 5000 }, { dur: 40, max: 4900 }, { dur: 80, max: 5200 }, { dur: 42, max: 7000 }];
 const MAX_PLAYERS = 300;
 // legacy quips (no longer shown; the client messages live in the page)

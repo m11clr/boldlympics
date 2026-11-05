@@ -359,18 +359,18 @@ body[data-role="play"] .phs{background:none!important}
 .st1 .a{left:calc(50% - 545px);top:calc(50% - 78px)}
 .st1 .b{left:calc(50% - 170px);top:calc(50% + 8px)}
 .st.on .a{animation:storyIn 1s .5s cubic-bezier(.2,1,.3,1) backwards}
-.st.on .b{animation:storyIn 1s 2.6s cubic-bezier(.2,1,.3,1) backwards}
+.st.on .b{animation:storyIn 1s 2.3s cubic-bezier(.2,1,.3,1) backwards}
 .st2 p{left:calc(50% - 745px);top:calc(50% - 34px)}
 .st2 p span{display:inline-block;white-space:pre}
 .st.on p span{animation:storyIn .7s cubic-bezier(.2,1,.3,1) backwards}
 .st-wm{position:absolute;left:64px;top:64px;width:calc(100% - 128px);height:auto;aspect-ratio:474.535/30.175;max-height:180px;color:#fff}
-.st.on .st-wm{animation:dropIn 1s 4.4s cubic-bezier(.2,1,.3,1) backwards}
+.st.on .st-wm{animation:dropIn 1s 7.1s cubic-bezier(.2,1,.3,1) backwards}
 .dcg{position:absolute;left:calc(50% - 745px);top:calc(50% - 104px);display:flex;flex-direction:column;font:600 69.4px/1 var(--f-sans)}
 .st.on .dcg span{animation:storyIn .8s cubic-bezier(.2,1,.3,1) backwards}
-.st.on .dcg span:nth-child(1){animation-delay:.6s}.st.on .dcg span:nth-child(2){animation-delay:1.7s}.st.on .dcg span:nth-child(3){animation-delay:2.8s}
+.st.on .dcg span:nth-child(1){animation-delay:.5s}.st.on .dcg span:nth-child(2){animation-delay:1.55s}.st.on .dcg span:nth-child(3){animation-delay:2.5s}
 .pres3{position:absolute;left:50%;margin-left:-331.5px;top:calc(50% + 278px);width:663px;height:124px;display:flex;flex-direction:column;align-items:center;justify-content:space-between;font:400 41.5px/1 var(--f-sans)}
 .pres3 svg{width:662.7px;height:46.5px}
-.st.on .pres3{animation:fadeIn 1.2s 5.6s ease-out backwards}
+.st.on .pres3{animation:fadeIn 1.2s 8.8s ease-out backwards}
 @keyframes storyIn{from{opacity:0;translate:0 28px;filter:blur(6px)}to{opacity:1;translate:0 0;filter:blur(0)}}
 .v-client{position:absolute;inset:0;background:rgba(0,0,0,.6);animation:fadeIn .6s ease-out backwards;transition:opacity .6s}
 .v-client.black{background:#000}
@@ -577,7 +577,7 @@ const LOGO_D="M1905.24,118.58c-21.58-60.58-97.23-97.24-206.82-97.24h-291.67c-.86
 const B_D="M598.777 253.821V234.893C743.96 234.893 791.617 204.738 813.332 166.881C821.805 152.148 826 134.613 826 114.996C826 96.7562 822.493 80.6301 814.102 65.9135C790.241 24.5332 729.227 0 611.429 0H0V490.844H611.429C729.227 490.844 790.224 465.59 814.102 424.226C822.493 409.493 826 393.367 826 375.143C826 355.51 821.805 337.975 813.332 323.258C791.601 285.385 746.009 253.821 598.777 253.821Z";
 const LOGO_W=1920,LOGO_H=312.8,B_W=826,B_H=490.844;
 
-const T={lobby:120,story:30,client:10,finalround:3,rules:10,results:20,clientfinal:10,podium:30,final:15,total:480};
+const T={lobby:120,story:35,client:10,finalround:3,rules:10,results:20,clientfinal:10,podium:30,final:15,total:485};
 const FONT_UI="'BL Saans', Saans, 'Instrument Sans', Arial, sans-serif";
 const GAMES=[
   {id:'fill',name:'Fill the Logo',dur:20,max:5000,rule:'Colour in the BOLD logo with a hairline brush. The more of the logo you fill, the more you score. Paint outside the lines and it costs you.',meta:['20 s','up to 5 000 pts','one finger']},
@@ -676,7 +676,7 @@ function resetAll(){G.players=[];G.byId={};G.me=null;G.n=0;G.goal=10000;G.pi=-1;
 function enterPhase(k){
   const ph=G.sched[k];if(!ph)return;G.pi=k;
   if(ROLE==='play'&&Phone.activeG()>=0&&!(ph.type==='play'&&ph.g===Phone.activeG())){const g=Phone.activeG(),pts=Phone.finish();Net.emit('score',{g,pts,final:true});}
-  if(ph.type==='story'){Snd.q=[];Snd.stopVO();Snd.crowd(0);at(.6,()=>Snd.vo('s_pixel'));at(10.5,()=>Snd.vo('s_forget'));at(20.1,()=>Snd.vo('s_welcome'));}
+  if(ph.type==='story'){Snd.q=[];Snd.stopVO();Snd.crowd(0);at(.3,()=>Snd.vo('st_a'));at(10.3,()=>Snd.vo('st_b'));at(20.2,()=>Snd.vo('st_c'));}
   if(ph.type==='rules'&&ph.g===0){Snd.organ(1);Snd.roar(4,.95);Snd.crowd(.2);at(1.6,()=>Snd.vo('play_to_win',true));}
   if(ph.type==='rules'&&ph.g===3)Snd.vo('hex',true);
   if(ph.type==='client'){Snd.crowd(.1);if(ph.g===2)at(4,()=>Snd.vo('c_interesting'));if(ph.g===3)at(4.6,()=>Snd.vo('c_kidding'));}
@@ -1070,7 +1070,7 @@ const Proj=(()=>{
   let storyK=-1,msgIdx=0,msgKey='';
   function storyUpdate(lt){const k=Math.min(2,Math.floor(lt/10));if(k===storyK)return;storyK=k;
     document.querySelectorAll('.st').forEach((e,i)=>e.classList.toggle('on',i===k));
-    if(k===1){$('#st2').innerHTML='Getting paid is sometimes the real competition.'.split(' ').map((w,i)=>`<span style="animation-delay:${(.6+i*.32).toFixed(2)}s">${w} </span>`).join('');}}
+    if(k===1){$('#st2').innerHTML='Getting paid is sometimes the real competition.'.split(' ').map((w,i)=>`<span style="animation-delay:${(.9+i*.45).toFixed(2)}s">${w} </span>`).join('');}}
   function clientUpdate(lt,isFinal){const lines=CLIENT_MSGS[msgIdx]||[],T0=.9,STEP=1.45,TYPE=.75;
     let n=0;lines.forEach((l,i)=>{if(lt>=T0+i*STEP)n=i+1;});
     const typing=n<lines.length&&lt>=T0+n*STEP-TYPE;
