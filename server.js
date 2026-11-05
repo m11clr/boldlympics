@@ -20,7 +20,7 @@ app.use(express.static(PUB, { index: false, maxAge: '1h' }));
 app.get('/healthz', (req, res) => res.send('ok'));
 
 /* ---------- game rules (kept in sync with the client) ---------- */
-const T = { lobby: 120, about: 24, rules: 20, count: 5, results: 20, total: 600 };
+const T = { lobby: 120, about: 23, rules: 20, count: 5, results: 20, podium: 30, total: 540 };
 const GAMES = [{ dur: 20, max: 5000 }, { dur: 20, max: 5000 }, { dur: 40, max: 4900 }, { dur: 80, max: 5200 }, { dur: 42, max: 7000 }];
 const MAX_PLAYERS = 300;
 const QUOTES = ['One more thing…', 'Please could you make some changes?', 'Can we make the logo bigger first?', "Our CEO's wife has some feedback.", "Let's do just one more round.", 'The board wants to see it in green.', 'Accounting needs a new PO number.', "We'll pay once it goes viral."];
@@ -37,7 +37,8 @@ function buildSched() {
   const add = (type, dur, g = -1) => { s.push({ type, g, start: t, dur, end: t + dur }); t += dur; };
   add('about', T.about);
   GAMES.forEach((g, i) => { add('rules', T.rules, i); add('count', T.count, i); add('play', g.dur, i); add('results', T.results, i); });
-  add('podium', Math.max(30, T.total - t));
+  add('podium', T.podium);
+  add('final', Math.max(30, T.total - t - T.podium));   // countdown only, sound fades out
   return s;
 }
 const SCHED = buildSched();
@@ -85,6 +86,7 @@ function enterPhase(k) {
   const ph = SCHED[k]; S.pi = k;
   if (ph.type === 'play') S.players.forEach(p => { if (p.isBot) { p.scores[ph.g] = botScore(p, ph.g); p.got[ph.g] = true; } });
   if (ph.type === 'results') at(1.5, () => computeResults(ph.g));   // give phones a moment to send their score
+  if (ph.type === 'final') { S.cdOnly = true; broadcastState(); }
 }
 function computeResults(g) {
   if (S.lastResG >= g) return; S.lastResG = g;
@@ -143,11 +145,12 @@ io.on('connection', sock => {
     sock.emit('state', snapshot(sock));
     for (const [, s] of sockets()) if (s.data.role !== 'play') s.emit('joins', [rosterRow(p)]);
   });
-  sock.on('score', ({ g, pts } = {}) => {
+  sock.on('score', ({ g, pts, final } = {}) => {
     const p = sock.data.pid != null ? S.players[sock.data.pid] : null;
     if (!p || S.mode !== 'game' || !(g >= 0 && g < 5) || p.got[g] || S.lastResG >= g) return;
     const ph = SCHED[S.pi]; if (!ph || ph.g !== g || (ph.type !== 'play' && ph.type !== 'results')) return;
-    p.scores[g] = clamp(Math.round(Number(pts) || 0), 0, GAMES[g].max); p.got[g] = true;
+    // provisional scores arrive every 1.5 s during play, the final one when the clock runs out
+    p.scores[g] = clamp(Math.round(Number(pts) || 0), 0, GAMES[g].max); if (final !== false) p.got[g] = true;
   });
   sock.on('admin', ({ cmd, v } = {}) => {
     if (sock.data.role !== 'admin') return;
@@ -159,7 +162,7 @@ io.on('connection', sock => {
     }
     if (cmd === 'cdonly') { S.cdOnly = !S.cdOnly; broadcastState(); }
     if (cmd === 'reset') { fresh('idle'); broadcastState(); }
-    if (cmd === 'skip' && S.mode === 'game') { const ph = SCHED[S.pi]; if (ph && ph.type !== 'podium') S.t = ph.end + 0.001; }
+    if (cmd === 'skip' && S.mode === 'game') { const ph = SCHED[S.pi]; if (ph && ph.type !== 'final') S.t = ph.end + 0.001; }
     if (cmd === 'speed') { S.speed = [1, 2, 4].includes(v) ? v : 1; }
   });
 });
