@@ -70,7 +70,7 @@ button,input{font:inherit;color:inherit}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 
 .brandbar{position:absolute;left:64px;top:64px;display:none;align-items:flex-start;gap:8px;animation:dropIn .7s cubic-bezier(.2,1,.3,1) backwards}
-.ui[data-mode="game"] .brandbar,.ui[data-mode="client"] .brandbar,.ui[data-mode="finalround"] .brandbar,.ui[data-mode="count"] .brandbar,.ui[data-mode="results"] .brandbar,.ui[data-mode="final"] .brandbar{display:flex}
+.ui[data-mode="game"] .brandbar,.ui[data-mode="arena"] .brandbar,.ui[data-mode="client"] .brandbar,.ui[data-mode="finalround"] .brandbar,.ui[data-mode="count"] .brandbar,.ui[data-mode="results"] .brandbar,.ui[data-mode="final"] .brandbar{display:flex}
 .brandbar .wm{width:436px;height:27.7px;color:#fff;opacity:.8}
 .live{display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,.2);border-radius:8px;padding:3.9px 6px;font:600 17.5px/1 var(--f-sans)}
 .live i{width:14.25px;height:14.25px;border-radius:50%;background:var(--red);display:block;animation:blink 1.4s infinite}
@@ -577,7 +577,7 @@ const LOGO_D="M1905.24,118.58c-21.58-60.58-97.23-97.24-206.82-97.24h-291.67c-.86
 const B_D="M598.777 253.821V234.893C743.96 234.893 791.617 204.738 813.332 166.881C821.805 152.148 826 134.613 826 114.996C826 96.7562 822.493 80.6301 814.102 65.9135C790.241 24.5332 729.227 0 611.429 0H0V490.844H611.429C729.227 490.844 790.224 465.59 814.102 424.226C822.493 409.493 826 393.367 826 375.143C826 355.51 821.805 337.975 813.332 323.258C791.601 285.385 746.009 253.821 598.777 253.821Z";
 const LOGO_W=1920,LOGO_H=312.8,B_W=826,B_H=490.844;
 
-const T={lobby:120,story:35,client:10,finalround:3,rules:10,results:20,clientfinal:10,podium:30,final:15,total:485};
+const T={lobby:120,story:35,arena:5,client:12,finalround:3,rules:10,count:5,results:10,clientfinal:10,podium:30,final:15,total:473};
 const FONT_UI="'BL Saans', Saans, 'Instrument Sans', Arial, sans-serif";
 const GAMES=[
   {id:'fill',name:'Fill the Logo',dur:20,max:5000,rule:'Colour in the BOLD logo with a hairline brush. The more of the logo you fill, the more you score. Paint outside the lines and it costs you.',meta:['20 s','up to 5 000 pts','one finger']},
@@ -647,8 +647,8 @@ document.addEventListener('pointerdown',()=>Snd.init(),{passive:true});
 const ROLE=document.body.dataset.role;
 const G={mode:'idle',lobbyLeft:T.lobby,t:0,speed:1,sched:[],pi:-1,players:[],byId:{},me:null,n:0,goal:10000,due:new Date(),seed:1,results:null,events:[],lastBeep:null,cdOnly:false,voFlags:{},leaderId:null,booted:false};
 function buildSched(){const s=[];let t=0;const add=(type,dur,g=-1)=>{s.push({type,g,start:t,dur,end:t+dur});t+=dur;};
-  add('story',T.story);
-  GAMES.forEach((g,i)=>{if(i>0)add('client',T.client,i-1);if(i===4)add('finalround',T.finalround,i);add('rules',T.rules,i);add('play',g.dur,i);add('results',T.results,i);});
+  add('story',T.story);add('arena',T.arena);
+  GAMES.forEach((g,i)=>{if(i>0)add('client',T.client,i-1);if(i===4)add('finalround',T.finalround,i);add('rules',T.rules,i);add('count',T.count,i);add('play',g.dur,i);add('results',T.results,i);});
   add('clientfinal',T.clientfinal);add('podium',T.podium);add('final',T.final);return s;}
 G.sched=buildSched();
 const phase=()=>G.mode==='game'&&G.pi>=0?G.sched[G.pi]:null;
@@ -677,13 +677,14 @@ function enterPhase(k){
   const ph=G.sched[k];if(!ph)return;G.pi=k;
   if(ROLE==='play'&&Phone.activeG()>=0&&!(ph.type==='play'&&ph.g===Phone.activeG())){const g=Phone.activeG(),pts=Phone.finish();Net.emit('score',{g,pts,final:true});}
   if(ph.type==='story'){Snd.q=[];Snd.stopVO();Snd.crowd(0);at(.3,()=>Snd.vo('st_a'));at(10.3,()=>Snd.vo('st_b'));at(20.2,()=>Snd.vo('st_c'));}
-  if(ph.type==='rules'&&ph.g===0){Snd.organ(1);Snd.roar(4,.95);Snd.crowd(.2);at(1.6,()=>Snd.vo('play_to_win',true));}
+  if(ph.type==='arena'){Snd.organ(1);Snd.roar(4,.95);Snd.crowd(.2);at(1.2,()=>Snd.vo('play_to_win',true));}
   if(ph.type==='rules'&&ph.g===3)Snd.vo('hex',true);
   if(ph.type==='client'){Snd.crowd(.1);if(ph.g===2)at(4,()=>Snd.vo('c_interesting'));if(ph.g===3)at(4.6,()=>Snd.vo('c_kidding'));}
   if(ph.type==='finalround'){Snd.organ(1.12);Snd.roar(2.5,.85);Snd.vo('c_heating',true);}
   if(ph.type==='clientfinal'){Snd.crowd(.05);at(6.2,()=>Snd.vo('c_kidding',true));}
   if(ph.type==='play'){Snd.roar(2.5,.8);Snd.shot();Proj.flash();}
-  if(ph.type==='final'){Snd.fadeAll(2.5);G.lastBeep=null;}
+  if(ph.type==='final'||ph.type==='count'){G.lastBeep=null;}
+  if(ph.type==='final'){Snd.fadeAll(2.5);}
   if(ph.type==='podium'){Scene.setMode('podium');Proj.flash();Snd.organ(1);Snd.roar(9,1);Snd.crowd(.35);at(5,()=>Snd.vo('sponsor'));}
   if(ph.type==='count')G.lastBeep=null;
   Proj.enter(ph);Admin.sync();
@@ -697,7 +698,7 @@ function applyResults(r,snap){
 }
 function applyGoal(d){
   G.goal=d.next;G.due=new Date(d.due);
-  Scene.focusGoal(3.4);Scene.moveGoal(d.next);Snd.vo(d.vo||'c_pushed',true);Snd.roar(1.5,.5);Snd.bad();
+  Scene.focusGoal(4.6);Scene.moveGoal(d.next);Snd.vo(d.vo||'c_pushed',true);Snd.roar(1.5,.5);Snd.bad();
 }
 function applyState(d){
   const prev=G.mode;
@@ -1047,6 +1048,7 @@ const Proj=(()=>{
     ui.dataset.sub=ph.type==='rules'?'rules':'';
     if(ph.type==='about'){mode('about');show(['about']);}
     if(ph.type==='story'){mode('story');show(['story']);storyK=-1;}
+    if(ph.type==='arena'){mode('arena');show([]);}
     if(ph.type==='client'||ph.type==='clientfinal'){mode(ph.type);show(['client']);const vc=$('#vClient');vc.classList.toggle('black',ph.type==='clientfinal');vc.classList.remove('out');vc.style.animation='none';void vc.offsetWidth;vc.style.animation='';msgIdx=ph.type==='clientfinal'?4:ph.g;msgKey='';}
     if(ph.type==='finalround'){mode('finalround');show(['fr']);const b=$('#vFR b');b.style.animation='none';void b.offsetWidth;b.style.animation='';}
     if(ph.type==='rules'||ph.type==='play'){mode('game');show(['game']);
@@ -1071,11 +1073,14 @@ const Proj=(()=>{
   function storyUpdate(lt){const k=Math.min(2,Math.floor(lt/10));if(k===storyK)return;storyK=k;
     document.querySelectorAll('.st').forEach((e,i)=>e.classList.toggle('on',i===k));
     if(k===1){$('#st2').innerHTML='Getting paid is sometimes the real competition.'.split(' ').map((w,i)=>`<span style="animation-delay:${(.9+i*.45).toFixed(2)}s">${w} </span>`).join('');}}
-  function clientUpdate(lt,isFinal){const lines=CLIENT_MSGS[msgIdx]||[],T0=.9,STEP=1.45,TYPE=.75;
+  function clientUpdate(lt,isFinal){const lines=CLIENT_MSGS[msgIdx]||[],T0=.9,STEP=1.45,TYPE=.75,box=$('#clBubs');
+    if(msgKey===''){box.innerHTML='';msgKey='on';}
     let n=0;lines.forEach((l,i)=>{if(lt>=T0+i*STEP)n=i+1;});
     const typing=n<lines.length&&lt>=T0+n*STEP-TYPE;
-    const key=n+'|'+typing;if(key!==msgKey){msgKey=key;
-      $('#clBubs').innerHTML=lines.slice(0,n).map((l,i)=>`<div class="cl-b${i===n-1?' new':''}${i===lines.length-1?' last':''}">${esc(l)}</div>`).join('')+(typing?'<div class="cl-b typing"><span></span><span></span><span></span></div>':'');}
+    let ty=box.querySelector('.typing');const have=box.querySelectorAll('.cl-b:not(.typing)').length;
+    for(let i=have;i<n;i++){const d=document.createElement('div');d.className='cl-b new'+(i===lines.length-1?' last':'');d.textContent=lines[i];box.insertBefore(d,ty);}
+    if(typing&&!ty){ty=document.createElement('div');ty.className='cl-b typing';ty.innerHTML='<span></span><span></span><span></span>';box.appendChild(ty);}
+    if(!typing&&ty)ty.remove();
     $('#vClient').classList.toggle('out',!isFinal&&lt>=7.1);}
   function renderFinal(){const w=G.results&&G.results.byTot[0];
     if(!w){$('#champ').innerHTML='<small>BOLDLYMPICS CHAMPION OF THE WORLD!</small><h2>Nobody</h2>';return;}
@@ -1135,10 +1140,10 @@ const Proj=(()=>{
     if(ph.type==='story'){storyUpdate(lt);return;}
     if(ph.type==='client'||ph.type==='clientfinal'){clientUpdate(lt,ph.type==='clientfinal');return;}
     if(!g)return;
-    if(ph.type==='rules'){$('#gFtLab').textContent='Starts in';$('#gFtVal').textContent=fmtT(lft);drawDemo(g.id,lt);}
+    if(ph.type==='rules'){$('#gFtLab').textContent='Starts in';$('#gFtVal').textContent=fmtT(lft+T.count);drawDemo(g.id,lt);}
     if(ph.type==='play'){if(g.id==='color'||g.id==='brand')stage(g,lt);else{drawDemo(g.id,lt);$('#gBar').style.transform=`scaleX(${clamp(lft/ph.dur,0,1)})`;$('#gPfLab').textContent='Time left · '+fmtT(lft);}}
     if(ph.type==='count'){const n=Math.ceil(lft),b=$('#countTxt'),txt=n<=1?'SET!':String(n);if(b.textContent!==txt){b.textContent=txt;b.className=n<=1?'set':'';b.style.animation='none';void b.offsetWidth;b.style.animation='';}}
-    if(ph.type==='results'&&G.results&&G.results.g===ph.g){const k=lt<10?'g':'t';if(k!==boardKey){boardKey=k;
+    if(ph.type==='results'&&G.results&&G.results.g===ph.g){const k=lt<5.5?'g':'t';if(k!==boardKey){boardKey=k;
       if(k==='g')renderBoard('Round '+(ph.g+1),G.results.byGame,p=>fmtPts(p.last));
       else renderBoard('Overall',G.results.byTot,p=>fmtPts(p.total));}}
   };
@@ -1310,10 +1315,10 @@ const Phone=(()=>{
     if(!G.me){set('spec','',`<div class="ph-msg">Joining is closed<small>The game already started. Enjoy the show on the big screen.</small></div>`);return;}
     const me=G.me,ph=phase();
     const joined=()=>{if(set('joined'+me.total,'',card(`${avatar(me.color)}<div style="display:flex;flex-direction:column;align-items:center"><div class="ph-nick">${esc(me.nick)}</div>${chip(me)}</div><div class="ph-pts">${fmtPts(me.total)} pts</div>`)))fit(view.querySelector('.ph-nick'),16);};
-    if(G.mode==='lobby'||!ph||['about','story','client','clientfinal'].includes(ph.type)){joined();return;}
+    if(G.mode==='lobby'||!ph||['about','story','arena','client','clientfinal'].includes(ph.type)){joined();return;}
     if(ph.type==='finalround'){set('fr','',card(`<div class="ph-eye">Round 5 of 5</div><div class="ph-num" style="font-size:58px;line-height:1.05">FINAL<br>ROUND</div><div class="ph-sub">Get ready</div>`));return;}
     const g=ph.g>=0?GAMES[ph.g]:null,lt=G.t-ph.start,left=ph.end-G.t;
-    if(ph.type==='rules'){if(set('r'+ph.g,'',card(`<div class="ph-eye">Round ${ph.g+1} of 5</div><div class="ph-title">${g.name}</div><div class="ph-text">${esc(g.rule)}</div><div class="ph-sub" id="phLeft"></div>`)))fit(view.querySelector('.ph-title'),24);const e=$('#phLeft');if(e)e.textContent='Get ready · '+fmtT(left);}
+    if(ph.type==='rules'){if(set('r'+ph.g,'',card(`<div class="ph-eye">Round ${ph.g+1} of 5</div><div class="ph-title">${g.name}</div><div class="ph-text">${esc(g.rule)}</div><div class="ph-sub" id="phLeft"></div>`)))fit(view.querySelector('.ph-title'),24);const e=$('#phLeft');if(e)e.textContent='Get ready · '+fmtT(left+T.count);}
     if(ph.type==='count'){set('c'+ph.g,'',card(`<div class="ph-eye">${g.name}</div><div class="ph-num" id="phCnt"></div>`));const n=Math.ceil(left),e=$('#phCnt'),txt=n<=1?'SET!':String(n);if(e&&e.textContent!==txt){e.textContent=txt;e.className='ph-num'+(n<=1?' set':'');}}
     if(ph.type==='play'&&(doneG===ph.g||left<=0)){
       if(game&&gIdx===ph.g){const gg=gIdx,pts=api.finish();Net.emit('score',{g:gg,pts,final:true});}doneG=ph.g;
@@ -1337,7 +1342,7 @@ const Phone=(()=>{
    ========================================================= */
 const Admin=(()=>{
   const b=id=>$('#'+id),api={};
-  const NAMES={about:'Intro',story:'Story',client:'Client',finalround:'Final',clientfinal:'Client',podium:'Winner',final:'15s'};
+  const NAMES={about:'Intro',story:'Story',arena:'',client:'Client',finalround:'Final',clientfinal:'Client',podium:'Winner',final:'15s'};
   const cmd=(c,v)=>{Snd.init();Net.emit('admin',{cmd:c,v});};
   api.buildTimeline=()=>{b('tl').innerHTML=G.sched.map(p=>`<span class="t-${p.type}" style="width:${p.dur/T.total*100}%" title="${p.type}${p.g>=0?' · '+GAMES[p.g].name:''} · ${p.dur}s">${p.type==='play'?GAMES[p.g].name:NAMES[p.type]||''}</span>`).join('')+'<i id="tlMark"></i>';};
   api.sync=()=>{if(ROLE!=='admin')return;const m=G.mode,ph=phase(),over=m==='game'&&ph&&(ph.type==='podium'||ph.type==='final');
@@ -1377,6 +1382,7 @@ function frame(now){
     if(ROLE==='screen'){if(G.lobbyLeft<=85&&!G.voFlags.sp){G.voFlags.sp=1;Snd.vo('sponsor');}if(G.lobbyLeft<=60&&!G.voFlags.m1){G.voFlags.m1=1;Snd.vo('one_min');}}}
   else if(G.mode==='game'){G.t+=sdt;
     const cp=phase();if(ROLE==='screen'&&cp&&cp.type==='final'){const rem=T.total-G.t,n=Math.ceil(rem);if(rem>0&&n<=10&&n!==G.lastBeep){G.lastBeep=n;Snd.heart();}}
+    if(ROLE==='screen'&&cp&&cp.type==='count'){const n=Math.ceil(cp.end-G.t);if(n!==G.lastBeep&&n>=1&&n<=5){G.lastBeep=n;if(n>1)Snd.beep();else Snd.say('Set!');}}
     if(G.events.length){const due=G.events.filter(e=>G.t>=e.at);G.events=G.events.filter(e=>G.t<e.at);due.forEach(e=>e.fn());}}
   if(ROLE==='screen'){Snd.tickCrowd(dt);try{Scene.update(dt,sdt);}catch(e){console.error(e);}Proj.update();
     fpsA+=dt;fpsN++;if(fpsA>1){fpsA=0;fpsN=0;}}

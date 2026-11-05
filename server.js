@@ -20,7 +20,7 @@ app.use(express.static(PUB, { index: false, maxAge: '1h' }));
 app.get('/healthz', (req, res) => res.send('ok'));
 
 /* ---------- game rules (kept in sync with the client) ---------- */
-const T = { lobby: 120, story: 35, client: 10, finalround: 3, rules: 10, results: 20, clientfinal: 10, podium: 30, final: 15, total: 485 };
+const T = { lobby: 120, story: 35, arena: 5, client: 12, finalround: 3, rules: 10, count: 5, results: 10, clientfinal: 10, podium: 30, final: 15, total: 473 };
 const GAMES = [{ dur: 20, max: 5000 }, { dur: 20, max: 5000 }, { dur: 40, max: 4900 }, { dur: 80, max: 5200 }, { dur: 42, max: 7000 }];
 const MAX_PLAYERS = 300;
 // legacy quips (no longer shown; the client messages live in the page)
@@ -37,10 +37,11 @@ function buildSched() {
   const s = []; let t = 0;
   const add = (type, dur, g = -1) => { s.push({ type, g, start: t, dur, end: t + dur }); t += dur; };
   add('story', T.story);                                   // three black story slides
+  add('arena', T.arena);                                   // 5 s of stadium before the first game
   GAMES.forEach((g, i) => {
     if (i > 0) add('client', T.client, i - 1);             // message from the client, then the finish line moves
     if (i === 4) add('finalround', T.finalround, i);
-    add('rules', T.rules, i); add('play', g.dur, i); add('results', T.results, i);
+    add('rules', T.rules, i); add('count', T.count, i); add('play', g.dur, i); add('results', T.results, i);
   });
   add('clientfinal', T.clientfinal);                       // accounting is out of office
   add('podium', T.podium);
@@ -93,7 +94,7 @@ function enterPhase(k) {
   if (ph.type === 'play') S.players.forEach(p => { if (p.isBot) { p.scores[ph.g] = botScore(p, ph.g); p.got[ph.g] = true; } });
   if (ph.type === 'results') at(1.5, () => computeResults(ph.g));   // give phones a moment to send their score
   if (ph.type === 'final') { S.cdOnly = true; broadcastState(); }
-  if (ph.type === 'client') at(7.3, () => moveGoal(ph.g));
+  if (ph.type === 'client') at(7.2, () => moveGoal(ph.g));
 }
 function computeResults(g) {
   if (S.lastResG >= g) return; S.lastResG = g;
