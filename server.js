@@ -20,9 +20,10 @@ app.use(express.static(PUB, { index: false, maxAge: '1h' }));
 app.get('/healthz', (req, res) => res.send('ok'));
 
 /* ---------- game rules (kept in sync with the client) ---------- */
-const T = { lobby: 120, about: 23, rules: 20, count: 5, results: 20, podium: 30, total: 540 };
+const T = { lobby: 120, story: 30, client: 10, finalround: 3, rules: 10, results: 20, clientfinal: 10, podium: 30, final: 15, total: 480 };
 const GAMES = [{ dur: 20, max: 5000 }, { dur: 20, max: 5000 }, { dur: 40, max: 4900 }, { dur: 80, max: 5200 }, { dur: 42, max: 7000 }];
 const MAX_PLAYERS = 300;
+// legacy quips (no longer shown; the client messages live in the page)
 const QUOTES = ['One more thing…', 'Could you make a few tiny changes?', 'Can we make the logo bigger first?', 'Our CEO showed it to the team. A few notes.', "Let's do just one more round.", 'The board would love to see it in green.', 'Accounting needs a new PO number.', "We'll pay once it goes viral.", 'Love it! Can we see three more options?', "Quick call? Won't take long."];
 const NA = ['Pixel', 'Kern', 'Vector', 'Bezier', 'Grid', 'Swatch', 'Serif', 'Glyph', 'Mood', 'Layer', 'Artboard', 'Pantone', 'Hex', 'Gutter', 'Baseline', 'Tracking', 'Mockup', 'Brief', 'Raster', 'Spline', 'Anchor', 'Halftone', 'Gradient', 'Token', 'Lorem', 'Ipsum', 'Bleed', 'Crop', 'Orphan', 'Widow', 'Margin', 'Stroke', 'Opacity', 'Blend', 'Mask', 'Kerning'];
 const NB = ['Runner', 'Dash', 'Pusher', 'Ninja', 'Sprinter', 'Bolt', 'Fox', 'Crush', 'Rider', 'Wizard', 'Goblin', 'Otter', 'Moth', 'Panda', 'Pro', 'Max', 'Lord', 'Kid', 'Boss', 'Bandit', 'Pilot', 'Comet', 'Hero', 'Duck'];
@@ -35,10 +36,15 @@ const gauss = () => (Math.random() + Math.random() + Math.random() + Math.random
 function buildSched() {
   const s = []; let t = 0;
   const add = (type, dur, g = -1) => { s.push({ type, g, start: t, dur, end: t + dur }); t += dur; };
-  add('about', T.about);
-  GAMES.forEach((g, i) => { add('rules', T.rules, i); add('count', T.count, i); add('play', g.dur, i); add('results', T.results, i); });
+  add('story', T.story);                                   // three black story slides
+  GAMES.forEach((g, i) => {
+    if (i > 0) add('client', T.client, i - 1);             // message from the client, then the finish line moves
+    if (i === 4) add('finalround', T.finalround, i);
+    add('rules', T.rules, i); add('play', g.dur, i); add('results', T.results, i);
+  });
+  add('clientfinal', T.clientfinal);                       // accounting is out of office
   add('podium', T.podium);
-  add('final', Math.max(30, T.total - t - T.podium));   // countdown only, sound fades out
+  add('final', T.final);                                   // 15 s countdown only, heartbeat
   return s;
 }
 const SCHED = buildSched();
@@ -87,6 +93,7 @@ function enterPhase(k) {
   if (ph.type === 'play') S.players.forEach(p => { if (p.isBot) { p.scores[ph.g] = botScore(p, ph.g); p.got[ph.g] = true; } });
   if (ph.type === 'results') at(1.5, () => computeResults(ph.g));   // give phones a moment to send their score
   if (ph.type === 'final') { S.cdOnly = true; broadcastState(); }
+  if (ph.type === 'client') at(7.3, () => moveGoal(ph.g));
 }
 function computeResults(g) {
   if (S.lastResG >= g) return; S.lastResG = g;
@@ -98,15 +105,15 @@ function computeResults(g) {
     if (s.data.role !== 'play') s.emit('results', S.results);
     else if (s.data.pid != null) s.emit('you', meRow(S.players[s.data.pid]));
   }
-  // the finish line runs away whenever somebody reaches it
-  const lead = byTot.length ? byTot[0].total : 0;
-  if (lead >= S.goal) {
-    const oldDue = S.due; let next = S.goal, moves = 0;
-    while (next <= lead + 1500) { next = next < 20000 ? 20000 : next + 10000; moves++; }
-    S.goal = next; S.due = S.due + moves * 30 * 864e5;
-    const msg = { next, q: pick(QUOTES), oldDue, due: S.due };
-    at(7, () => io.emit('goal', msg));
-  }
+}
+
+// after every round the client pushes the finish line further away
+function moveGoal(g) {
+  const lead = S.players.reduce((m, p) => Math.max(m, p.total), 0);
+  const oldDue = S.due;
+  const next = Math.ceil(Math.max(S.goal + 5000, lead + 4000) / 1000) * 1000;
+  S.goal = next; S.due = S.due + 30 * 864e5;
+  io.emit('goal', { next, oldDue, due: S.due, vo: g === 1 ? 'c_goal' : 'c_pushed' });
 }
 
 let lastTick = Date.now(), lastSent = 0;
