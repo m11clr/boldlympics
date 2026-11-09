@@ -377,11 +377,12 @@ body[data-role="play"] .phs{background:none!important}
 .v-client{position:absolute;inset:0;background:rgba(0,0,0,.6);animation:fadeIn .6s ease-out backwards;transition:opacity .6s}
 .v-client.black{background:#000}
 .v-client.out{opacity:0}
-.cl-wrap{position:absolute;left:calc(50% - 281px);top:calc(50% - 260px);width:562px;display:flex;flex-direction:column;gap:20px}
-.v-client.black .cl-wrap{top:calc(50% - 288px)}
-.cl-who{align-items:center;gap:12px;font:600 24px/1 var(--f-sans)}
-.cl-who i{width:44px;height:44px;border-radius:50%;background:var(--blue);display:grid;place-items:center;font:600 20px/1 var(--f-sans);font-style:normal}
-.cl-who em{font-style:normal;font-weight:400;opacity:.7;margin-left:4px}
+.cl-wrap{position:absolute;left:calc(50% - 281px);top:calc(50% - 284px);width:562px;display:flex;flex-direction:column;gap:32px}
+.v-client.black .cl-wrap{top:calc(50% - 312px)}
+.cl-who{display:flex;align-items:center;gap:10px;width:100%;font:400 30px/1 var(--f-sans)}
+.cl-who i{width:56px;height:56px;border-radius:50%;background:var(--blue);display:grid;place-items:center;font:700 32px/1 var(--f-sans);font-style:normal}
+.cl-who b{font-weight:400}
+.cl-who em{font-style:normal;margin-left:auto}
 .cl-bubs{display:flex;flex-direction:column;gap:8px;align-items:flex-start}
 .cl-b{background:var(--blue);border-radius:32px;padding:16px 24px;font:600 48px/1 var(--f-sans);max-width:562px;transform-origin:0 100%}
 .cl-b.last{border-bottom-left-radius:0;align-self:stretch}
@@ -485,7 +486,7 @@ body[data-role="play"] .phs{background:none!important}
             </div>
           </section>
 
-          <section class="v v-client" id="vClient" hidden><div class="cl-wrap"><div class="cl-who"><i>C</i><b>The client</b><em>Just now</em></div><div class="cl-bubs" id="clBubs"></div></div></section>
+          <section class="v v-client" id="vClient" hidden><div class="cl-wrap"><div class="cl-who"><i>C</i><b>The Client</b><em>Just Now</em></div><div class="cl-bubs" id="clBubs"></div></div></section>
           <div class="v v-fr" id="vFR" hidden><b>FINAL ROUND</b></div>
 
           <section class="v v-final" id="vFinal" hidden>
