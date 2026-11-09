@@ -707,7 +707,7 @@ function applyResults(r,snap){
 function applyGoal(d){
   G.goal=d.next;G.due=new Date(d.due);
   if(d.silent){Scene.moveGoal(d.next,true);return;}
-  Scene.focusGoal(4.6);Scene.moveGoal(d.next);Snd.vo(d.vo||'c_pushed',true);Snd.roar(1.5,.5);Snd.bad();
+  Scene.focusGoal(5.4);at(.8,()=>{Scene.moveGoal(d.next);Snd.vo(d.vo||'c_pushed',true);Snd.roar(1.5,.5);Snd.bad();});
 }
 function applyState(d){
   const prev=G.mode;
@@ -1010,7 +1010,7 @@ const Scene=(()=>{
     /* camera */
     if(mode==='idle')aim(dt,10+16*Math.sin(t*.06),0,27);
     else if(mode==='lobby')aim(dt,3,0,24);
-    else if(mode==='race'&&simT<focusUntil){aim(dt,gateS-4,0,30);}
+    else if(mode==='race'&&simT<focusUntil){aim(dt*2.6,gateS-4,0,30);}
     else if(mode==='race'){if(order.length){order.sort((a,b)=>b-a);const L=order[0],Md=order[Math.floor(order.length/2)],spread=Math.max(0,L-Md),H=clamp(24+spread*.55,24,46);aim(dt,L-clamp(spread*.6+3,3,H*.55),0,H);}else aim(dt,3,0,24);}
     else if(mode==='podium'&&podC){aimV(dt,new THREE.Vector3(podC.x,0,podC.z),15);}
     const a=size.w/size.h;camera.left=-camH*a/2;camera.right=camH*a/2;const oy=mode==='podium'?.1:mode==='race'?.06:0;camera.top=camH*(.5-oy);camera.bottom=-camH*(.5+oy);
@@ -1050,9 +1050,11 @@ const Proj=(()=>{
   function endVideo(){const ph=cur;
     if(ROLE==='screen'&&ph&&ph.type==='podium'&&!vid.getAttribute('src')){vid.preload='auto';vid.src='/assets/timer_end.mp4';vid.load();}
     if(ROLE!=='screen'||!ph||ph.type!=='final'||G.mode!=='game'){if(vidOn){vidOn=false;vid.pause();ui.dataset.vid='';}return;}
-    const rem=T.total-G.t,el=T.final-rem;
-    if(!vidOn){vidOn=true;if(!vid.getAttribute('src'))vid.src='/assets/timer_end.mp4';try{vid.currentTime=Math.max(0,el);}catch(e){}const p=vid.play();p&&p.catch&&p.catch(()=>{});}
-    if(!vid.ended&&el<T.final&&Math.abs(vid.currentTime-el)>.6){try{vid.currentTime=Math.max(0,el);}catch(e){}}
+    const LEAD=7,rem=T.total-G.t,el=LEAD-rem;
+    if(!vid.getAttribute('src'))vid.src='/assets/timer_end.mp4';
+    if(el<0){if(vidOn){vidOn=false;vid.pause();}try{if(vid.currentTime)vid.currentTime=0;}catch(e){}}
+    else{if(!vidOn){vidOn=true;try{vid.currentTime=el;}catch(e){}const p=vid.play();p&&p.catch&&p.catch(()=>{});}
+      const dur=vid.duration||15.4;if(!vid.ended&&el<dur-.3&&Math.abs(vid.currentTime-el)>.6){try{vid.currentTime=el;}catch(e){}}}
     ui.dataset.vid=rem<=0?'done':rem<=7?'in':'';}
   api.flash=()=>{const f=$('#flash');f.classList.remove('on');void f.offsetWidth;f.classList.add('on');};
   let msgTimer=null;
@@ -1099,7 +1101,7 @@ const Proj=(()=>{
     for(let i=have;i<n;i++){const d=document.createElement('div');d.className='cl-b new'+(i===lines.length-1?' last':'');d.textContent=lines[i];box.insertBefore(d,ty);}
     if(typing&&!ty){ty=document.createElement('div');ty.className='cl-b typing';ty.innerHTML='<span></span><span></span><span></span>';box.appendChild(ty);}
     if(!typing&&ty)ty.remove();
-    $('#vClient').classList.toggle('out',!isFinal&&msgIdx!==3&&lt>=7.1);}
+    $('#vClient').classList.toggle('out',!isFinal&&msgIdx!==3&&lt>=6.5);}
   function renderFinal(){const w=G.results&&G.results.byTot[0];
     if(!w){$('#champ').innerHTML='<small>BOLDLYMPICS CHAMPION OF THE WORLD!</small><h2>Nobody</h2>';return;}
     $('#champ').innerHTML=`<small>BOLDLYMPICS CHAMPION OF THE WORLD!</small><div><h2>${esc(w.nick)}</h2><div class="meta"><span><i style="background:${w.color}"></i>${w.color}</span><span>${fmtPts(w.total)} pts</span></div></div>`;fit($('#champ h2'),30);requestAnimationFrame(()=>fit($('#champ h2'),30));if(document.fonts)document.fonts.ready.then(()=>fit($('#champ h2'),30));}

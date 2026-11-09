@@ -94,7 +94,7 @@ function enterPhase(k) {
   if (ph.type === 'play') S.players.forEach(p => { if (p.isBot) { p.scores[ph.g] = botScore(p, ph.g); p.got[ph.g] = true; } });
   if (ph.type === 'results') at(1.5, () => computeResults(ph.g));   // give phones a moment to send their score
   if (ph.type === 'final') { S.cdOnly = true; broadcastState(); }
-  if (ph.type === 'client' && ph.g < 3) at(7.2, () => moveGoal(ph.g));   // after round 4 the client only talks
+  if (ph.type === 'client' && ph.g < 3) at(6.6, () => moveGoal(ph.g));   // after round 4 the client only talks
 }
 function computeResults(g) {
   if (S.lastResG >= g) return; S.lastResG = g;
