@@ -20,7 +20,7 @@ app.use(express.static(PUB, { index: false, maxAge: '1h' }));
 app.get('/healthz', (req, res) => res.send('ok'));
 
 /* ---------- game rules (kept in sync with the client) ---------- */
-const T = { lobby: 120, story: 35, arena: 5, client: 12, finalround: 3, rules: 10, count: 5, results: 10, clientfinal: 10, podium: 30, final: 15, total: 473 };
+const T = { lobby: 120, story: 35, arena: 5, client: 12, finalround: 3, rules: 10, count: 5, results: 10, clientfinal: 10, podium: 20, final: 15, total: 463 };
 const GAMES = [{ dur: 20, max: 5000 }, { dur: 20, max: 5000 }, { dur: 40, max: 4900 }, { dur: 80, max: 5200 }, { dur: 42, max: 7000 }];
 const MAX_PLAYERS = 300;
 // legacy quips (no longer shown; the client messages live in the page)
@@ -94,7 +94,7 @@ function enterPhase(k) {
   if (ph.type === 'play') S.players.forEach(p => { if (p.isBot) { p.scores[ph.g] = botScore(p, ph.g); p.got[ph.g] = true; } });
   if (ph.type === 'results') at(1.5, () => computeResults(ph.g));   // give phones a moment to send their score
   if (ph.type === 'final') { S.cdOnly = true; broadcastState(); }
-  if (ph.type === 'client') at(7.2, () => moveGoal(ph.g));
+  if (ph.type === 'client' && ph.g < 3) at(7.2, () => moveGoal(ph.g));   // after round 4 the client only talks
 }
 function computeResults(g) {
   if (S.lastResG >= g) return; S.lastResG = g;
@@ -102,6 +102,11 @@ function computeResults(g) {
   const byGame = [...S.players].sort((a, b) => b.last - a.last || b.total - a.total); byGame.forEach((p, i) => p.gRank = i + 1);
   const byTot = [...S.players].sort((a, b) => b.total - a.total || b.last - a.last); byTot.forEach((p, i) => p.rank = i + 1);
   S.results = { g, tot: byTot.map(p => [p.id, p.total, p.last, p.rank, p.gRank]), game: byGame.slice(0, 12).map(p => p.id) };
+  // last round: quietly put the finish line where the leader will land, so the top runners actually cross it
+  if (g === 4 && byTot.length) {
+    S.goal = Math.max(1000, Math.floor((byTot[0].total - 400) / 100) * 100);
+    io.emit('goal', { next: S.goal, oldDue: S.due, due: S.due, silent: true });
+  }
   for (const [, s] of sockets()) {
     if (s.data.role !== 'play') s.emit('results', S.results);
     else if (s.data.pid != null) s.emit('you', meRow(S.players[s.data.pid]));

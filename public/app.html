@@ -389,6 +389,13 @@ body[data-role="play"] .phs{background:none!important}
 .v-fr{position:absolute;inset:0;background:rgba(0,0,0,.6);display:grid;place-items:center;animation:fadeIn .3s ease-out backwards}
 .v-fr b{font:900 74.85px/1 var(--f-flexa);font-stretch:125%;white-space:nowrap;animation:frIn .7s cubic-bezier(.2,1.4,.4,1) backwards}
 @keyframes frIn{from{opacity:0;transform:scale(2.2);letter-spacing:.3em}to{opacity:1;transform:none;letter-spacing:0}}
+/* ---------- final countdown video ---------- */
+.endvid{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;filter:blur(60px) saturate(1.3);transform:scale(1.15);display:none;transition:opacity 3s ease-out,filter 5.5s cubic-bezier(.3,0,.2,1),transform 6s cubic-bezier(.2,0,.1,1)}
+.ui[data-cdonly="1"] .endvid{display:block}
+.ui[data-vid="in"] .endvid,.ui[data-vid="done"] .endvid{opacity:1;filter:blur(0) saturate(1);transform:none}
+.ui[data-vid="in"] .shade,.ui[data-vid="done"] .shade{background:rgba(0,0,0,0)!important;transition:background 5s}
+.ui[data-vid="done"] .cd{animation:cdOut .9s cubic-bezier(.6,0,.4,1) forwards}
+@keyframes cdOut{0%{opacity:1;filter:blur(0)}100%{opacity:0;filter:blur(24px);translate:0 -40px;scale:.7}}
 @media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition:none!important}}
 </style>
 </head>
@@ -484,6 +491,7 @@ body[data-role="play"] .phs{background:none!important}
           </section>
 
           <div class="msg" id="toast" hidden></div>
+          <video class="endvid" id="endVid" muted playsinline preload="none"></video>
           <div class="cd" id="cd"><span id="cdLab">Countdown</span><b id="cdTxt">10:00</b></div>
           <div class="flash" id="flash"></div>
         </div>
@@ -577,7 +585,7 @@ const LOGO_D="M1905.24,118.58c-21.58-60.58-97.23-97.24-206.82-97.24h-291.67c-.86
 const B_D="M598.777 253.821V234.893C743.96 234.893 791.617 204.738 813.332 166.881C821.805 152.148 826 134.613 826 114.996C826 96.7562 822.493 80.6301 814.102 65.9135C790.241 24.5332 729.227 0 611.429 0H0V490.844H611.429C729.227 490.844 790.224 465.59 814.102 424.226C822.493 409.493 826 393.367 826 375.143C826 355.51 821.805 337.975 813.332 323.258C791.601 285.385 746.009 253.821 598.777 253.821Z";
 const LOGO_W=1920,LOGO_H=312.8,B_W=826,B_H=490.844;
 
-const T={lobby:120,story:35,arena:5,client:12,finalround:3,rules:10,count:5,results:10,clientfinal:10,podium:30,final:15,total:473};
+const T={lobby:120,story:35,arena:5,client:12,finalround:3,rules:10,count:5,results:10,clientfinal:10,podium:20,final:15,total:463};
 const FONT_UI="'BL Saans', Saans, 'Instrument Sans', Arial, sans-serif";
 const GAMES=[
   {id:'fill',name:'Fill the Logo',dur:20,max:5000,rule:'Colour in the BOLD logo with a hairline brush. The more of the logo you fill, the more you score. Paint outside the lines and it costs you.',meta:['20 s','up to 5 000 pts','one finger']},
@@ -698,6 +706,7 @@ function applyResults(r,snap){
 }
 function applyGoal(d){
   G.goal=d.next;G.due=new Date(d.due);
+  if(d.silent){Scene.moveGoal(d.next,true);return;}
   Scene.focusGoal(4.6);Scene.moveGoal(d.next);Snd.vo(d.vo||'c_pushed',true);Snd.roar(1.5,.5);Snd.bad();
 }
 function applyState(d){
@@ -806,7 +815,7 @@ const Scene=(()=>{
   /* perimeter LED boards on far side */
   const boardTexOld=canvasTex(8,8,(x,w,h)=>{x.fillStyle='#E52421';x.fillRect(0,0,w/2,h);x.fillStyle='#141416';x.fillRect(w/2,0,w/2,h);drawLogo(x,w/4,h/2,38,'#FFFFFF');x.fillStyle='#FFFFFF';x.font='900 30px '+FONT_UI+'';x.textAlign='center';x.textBaseline='middle';x.fillText('PAY YOUR DESIGNER',w*.75,h/2+1);},{repeat:true});
   /* sponsor logos from Figma */
-  const LOGOS=['webvalley','brot','bankov','institut','mkidn','better','cans','czechdesign','designportal','expats','font','kreativnibrno','kumst','puravida','screeno','solidpixels','visualbook','pgd','profil','schlauch','tga'];
+  const LOGOS=['webvalley','brot','bankov','institut','better','czechdesign','designportal','expats','font','kreativnibrno','kumst','puravida','screeno','solidpixels','visualbook','pgd','profil','schlauch','tga'];
   const ADBG=['#E52421','#141416','#009EE7','#280C14','#E52421','#141416'];
   let logoLoaded=0;const logoImg=LOGOS.map(n=>{const im=new Image();im.onload=()=>{logoLoaded++;if(logoLoaded===LOGOS.length)api.redrawTextures();};im.src='assets/logo_'+n+'.png';return im;});
   const NADS=LOGOS.length+1;
@@ -1031,11 +1040,20 @@ const Proj=(()=>{
   const mode=m=>{if(ui.dataset.mode!==m){const c=$('#cd');c.style.animation='none';void c.offsetWidth;c.style.animation='';}ui.dataset.mode=m;};
   function qr(){if(qrDone)return;qrDone=true;const url=location.origin+'/';try{new QRCode($('#qr'),{text:url,width:304,height:304,colorDark:'#000000',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});}catch(e){$('#qr').textContent='QR';}}
   const api={};
-  api.reset=()=>{cur=null;boardKey='';toastUntil=-1;$('#toast').hidden=true;labelsEl.innerHTML='';pool.length=0;ui.dataset.sub='';};
+  api.reset=()=>{if(vidOn){vidOn=false;vid.pause();}ui.dataset.vid='';cur=null;boardKey='';toastUntil=-1;$('#toast').hidden=true;labelsEl.innerHTML='';pool.length=0;ui.dataset.sub='';};
   api.onMode=()=>{cur=null;
     if(G.mode==='idle'){mode('idle');show(['lobby']);$('#lobCopy').textContent='The stadium opens in a moment. Get your thumb ready.';$('#lobCount').textContent='';}
     if(G.mode==='lobby'){mode('lobby');show(['lobby']);qr();$('#lobCopy').textContent='Scan the code, pick name, get a colour. You’ll need one thumb and zero briefs.';}};
   api.refresh=()=>{boardKey='';if(cur&&(cur.type==='podium'||cur.type==='final'))renderFinal();};
+  /* last 15 s: the video starts with the countdown, fades in sharp at 7 s left, stays on its last frame */
+  const vid=$('#endVid');let vidOn=false;
+  function endVideo(){const ph=cur;
+    if(ROLE==='screen'&&ph&&ph.type==='podium'&&!vid.getAttribute('src')){vid.preload='auto';vid.src='/assets/timer_end.mp4';vid.load();}
+    if(ROLE!=='screen'||!ph||ph.type!=='final'||G.mode!=='game'){if(vidOn){vidOn=false;vid.pause();ui.dataset.vid='';}return;}
+    const rem=T.total-G.t,el=T.final-rem;
+    if(!vidOn){vidOn=true;if(!vid.getAttribute('src'))vid.src='/assets/timer_end.mp4';try{vid.currentTime=Math.max(0,el);}catch(e){}const p=vid.play();p&&p.catch&&p.catch(()=>{});}
+    if(!vid.ended&&el<T.final&&Math.abs(vid.currentTime-el)>.6){try{vid.currentTime=Math.max(0,el);}catch(e){}}
+    ui.dataset.vid=rem<=0?'done':rem<=7?'in':'';}
   api.flash=()=>{const f=$('#flash');f.classList.remove('on');void f.offsetWidth;f.classList.add('on');};
   let msgTimer=null;
   api.toast=(q,oldD,newD)=>{const t=$('#toast');clearTimeout(msgTimer);
@@ -1081,7 +1099,7 @@ const Proj=(()=>{
     for(let i=have;i<n;i++){const d=document.createElement('div');d.className='cl-b new'+(i===lines.length-1?' last':'');d.textContent=lines[i];box.insertBefore(d,ty);}
     if(typing&&!ty){ty=document.createElement('div');ty.className='cl-b typing';ty.innerHTML='<span></span><span></span><span></span>';box.appendChild(ty);}
     if(!typing&&ty)ty.remove();
-    $('#vClient').classList.toggle('out',!isFinal&&lt>=7.1);}
+    $('#vClient').classList.toggle('out',!isFinal&&msgIdx!==3&&lt>=7.1);}
   function renderFinal(){const w=G.results&&G.results.byTot[0];
     if(!w){$('#champ').innerHTML='<small>BOLDLYMPICS CHAMPION OF THE WORLD!</small><h2>Nobody</h2>';return;}
     $('#champ').innerHTML=`<small>BOLDLYMPICS CHAMPION OF THE WORLD!</small><div><h2>${esc(w.nick)}</h2><div class="meta"><span><i style="background:${w.color}"></i>${w.color}</span><span>${fmtPts(w.total)} pts</span></div></div>`;fit($('#champ h2'),30);requestAnimationFrame(()=>fit($('#champ h2'),30));if(document.fonts)document.fonts.ready.then(()=>fit($('#champ h2'),30));}
@@ -1132,6 +1150,7 @@ const Proj=(()=>{
     if(G.mode==='lobby'){cdL.textContent='Doors close in';left=G.lobbyLeft;}else{cdL.textContent='Countdown';left=G.mode==='game'?T.total-G.t:T.total;}
     cdT.textContent=fmtT(left);cd.classList.toggle('hot',G.mode!=='idle'&&left<=10&&left>0);
     ui.dataset.cdonly=G.cdOnly?'1':'0';
+    endVideo();
     if(G.mode==='lobby'){const n=G.n;$('#lobCount').textContent=n?`${n} of 300 players in the stadium`:'Waiting for the first player';}
     if(G.t>=toastUntil&&!$('#toast').hidden){$('#toast').hidden=true;clearTimeout(msgTimer);}
     labels();
